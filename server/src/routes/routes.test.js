@@ -106,3 +106,55 @@ describe('PATCH /api/customers/:id/onboarding/steps/:stepId', () => {
     assert.strictEqual(res.status, 404);
   });
 });
+
+describe('PUT /api/tenants/:customerId', () => {
+  it('should update tenant plan', async () => {
+    const res = await request('PUT', '/api/tenants/cust_001', {
+      plan: 'enterprise'
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.plan, 'enterprise');
+    assert.strictEqual(res.body.customerId, 'cust_001');
+  });
+
+  it('should update tenant status', async () => {
+    const res = await request('PUT', '/api/tenants/cust_001', {
+      status: 'provisioning'
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.status, 'provisioning');
+  });
+
+  it('should update both status and plan', async () => {
+    const res = await request('PUT', '/api/tenants/cust_001', {
+      status: 'active',
+      plan: 'professional'
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.status, 'active');
+    assert.strictEqual(res.body.plan, 'professional');
+  });
+
+  it('should return 404 for unknown customer', async () => {
+    const res = await request('PUT', '/api/tenants/nonexistent', {
+      plan: 'starter'
+    });
+    assert.strictEqual(res.status, 404);
+  });
+
+  it('should return 400 for invalid status', async () => {
+    const res = await request('PUT', '/api/tenants/cust_001', {
+      status: 'bogus'
+    });
+    assert.strictEqual(res.status, 400);
+    assert.ok(res.body.error.includes('Status'));
+  });
+
+  it('should return 400 for invalid plan', async () => {
+    const res = await request('PUT', '/api/tenants/cust_001', {
+      plan: 'bogus'
+    });
+    assert.strictEqual(res.status, 400);
+    assert.ok(res.body.error.includes('Plan'));
+  });
+});

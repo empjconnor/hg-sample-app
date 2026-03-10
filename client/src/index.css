@@ -293,3 +293,42 @@ header p {
   background: #93c5fd;
   cursor: not-allowed;
 }
+
+.tenant-setup-tab h2 {
+  margin-bottom: 4px;
+}
+
+.tenant-setup-subtitle {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.tenant-details {
+  max-width: 500px;
+}
+
+.tenant-id {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-family: monospace;
+}
+
+.tenant-setup-form {
+  max-width: 500px;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: white;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}

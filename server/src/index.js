@@ -85,6 +85,28 @@ app.put('/api/customers/:id', (req, res) => {
   res.json(updated);
 });
 
+// Update tenant configuration
+app.put('/api/tenants/:customerId', (req, res) => {
+  const tenant = store.getTenantByCustomerId(req.params.customerId);
+  if (!tenant) {
+    return res.status(404).json({ error: 'Tenant not found' });
+  }
+  const { status, plan } = req.body;
+  const validStatuses = ['pending', 'provisioning', 'active', 'failed'];
+  const validPlans = ['starter', 'professional', 'enterprise'];
+  if (status && !validStatuses.includes(status)) {
+    return res.status(400).json({ error: `Status must be one of: ${validStatuses.join(', ')}` });
+  }
+  if (plan && !validPlans.includes(plan)) {
+    return res.status(400).json({ error: `Plan must be one of: ${validPlans.join(', ')}` });
+  }
+  const updates = {};
+  if (status) updates.status = status;
+  if (plan) updates.plan = plan;
+  const updated = store.updateTenant(req.params.customerId, updates);
+  res.json(updated);
+});
+
 // Update onboarding step status
 app.patch('/api/customers/:id/onboarding/steps/:stepId', (req, res) => {
   const { status } = req.body;
