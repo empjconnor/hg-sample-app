@@ -13,6 +13,12 @@ function App() {
   const [onboardingData, setOnboardingData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+
+  const selectCustomer = (customerId) => {
+    setSelectedCustomerId(customerId);
+    setActiveTab('customer-info');
+  };
 
   useEffect(() => {
     fetch('/api/onboarding')
@@ -56,10 +62,10 @@ function App() {
 
       <main className="content">
         {activeTab === 'dashboard' && (
-          <DashboardTab data={onboardingData} loading={loading} error={error} />
+          <DashboardTab data={onboardingData} loading={loading} error={error} onSelectCustomer={selectCustomer} />
         )}
         {activeTab === 'customer-info' && (
-          <PlaceholderTab title="Customer Info" description="Collect and validate customer information" />
+          <CustomerInfoTab customerId={selectedCustomerId} onboardingData={onboardingData} />
         )}
         {activeTab === 'data-mapping' && (
           <PlaceholderTab title="Data Mapping" description="Map customer data to platform configuration" />
@@ -75,7 +81,7 @@ function App() {
   );
 }
 
-function DashboardTab({ data, loading, error }) {
+function DashboardTab({ data, loading, error, onSelectCustomer }) {
   if (loading) {
     return <div className="placeholder"><p>Loading...</p></div>;
   }
@@ -101,7 +107,7 @@ function DashboardTab({ data, loading, error }) {
       </p>
 
       {data.map(item => (
-        <div key={item.customerId} className="customer-card">
+        <div key={item.customerId} className="customer-card" onClick={() => onSelectCustomer(item.customerId)} style={{ cursor: 'pointer' }}>
           <h3>{item.customerName}</h3>
           <div className="customer-meta">
             <span>📍 {item.customerRegion}</span>
@@ -146,6 +152,78 @@ function Checklist({ steps }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function CustomerInfoTab({ customerId, onboardingData }) {
+  const [customer, setCustomer] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!customerId) return;
+    setLoading(true);
+    fetch(`/api/customers/${customerId}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        setCustomer(data);
+        setError(null);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [customerId]);
+
+  if (!customerId) {
+    return (
+      <div className="placeholder">
+        <h2>Customer Info</h2>
+        <p>Select a customer from the Dashboard to view their details.</p>
+      </div>
+    );
+  }
+
+  if (loading) return <div className="placeholder"><p>Loading...</p></div>;
+  if (error) return <div className="placeholder"><p style={{ color: '#dc2626' }}>Failed to load customer: {error}</p></div>;
+  if (!customer) return null;
+
+  const onboarding = onboardingData.find(o => o.customerId === customerId);
+
+  return (
+    <div>
+      <h2>{customer.name}</h2>
+      <div className="customer-detail-grid">
+        <div className="detail-item">
+          <label>Contact Email</label>
+          <span>{customer.contactEmail}</span>
+        </div>
+        <div className="detail-item">
+          <label>Industry</label>
+          <span>{customer.industry}</span>
+        </div>
+        <div className="detail-item">
+          <label>Region</label>
+          <span>{customer.region}</span>
+        </div>
+        <div className="detail-item">
+          <label>Created</label>
+          <span>{new Date(customer.createdAt).toLocaleDateString()}</span>
+        </div>
+      </div>
+
+      {onboarding && (
+        <div style={{ marginTop: '24px' }}>
+          <h3>Onboarding Progress</h3>
+          <ProgressBar percent={onboarding.progressPercent} />
+          <Checklist steps={onboarding.steps} />
+        </div>
+      )}
+    </div>
   );
 }
 

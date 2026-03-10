@@ -45,8 +45,56 @@ function seedData() {
   store.onboardingStates.push(exampleOnboardingState);
 }
 
+// Seed additional customers from sample data
+function seedSampleCustomers() {
+  const sampleCustomers = [
+    createCustomer({
+      id: 'cust_002',
+      name: 'ABC Accounting',
+      industry: 'Accounting',
+      region: 'North America',
+      contactEmail: 'onboarding@abcaccounting.example.com',
+      createdAt: '2025-02-01T09:00:00Z'
+    }),
+    createCustomer({
+      id: 'cust_003',
+      name: 'XYZ Financial Services',
+      industry: 'Financial Services',
+      region: 'North America',
+      contactEmail: 'setup@xyzfinancial.example.com',
+      createdAt: '2025-02-10T14:00:00Z'
+    }),
+    createCustomer({
+      id: 'cust_004',
+      name: 'Premier Bookkeeping',
+      industry: 'Accounting',
+      region: 'United Kingdom',
+      contactEmail: 'admin@premierbookkeeping.example.co.uk',
+      createdAt: '2025-02-15T11:00:00Z'
+    })
+  ];
+
+  const sampleTenants = [
+    createTenant({ id: 'tenant_002', customerId: 'cust_002', status: 'pending', plan: 'professional' }),
+    createTenant({ id: 'tenant_003', customerId: 'cust_003', status: 'pending', plan: 'enterprise' }),
+    createTenant({ id: 'tenant_004', customerId: 'cust_004', status: 'pending', plan: 'starter' })
+  ];
+
+  sampleCustomers.forEach(c => store.customers.push(c));
+  sampleTenants.forEach(t => store.tenants.push(t));
+
+  sampleCustomers.forEach(c => {
+    store.onboardingStates.push({
+      customerId: c.id,
+      steps: createDefaultOnboardingSteps(),
+      progressPercent: 0
+    });
+  });
+}
+
 // Initialize with seed data
 seedData();
+seedSampleCustomers();
 
 // Store access functions
 function getCustomers() {
