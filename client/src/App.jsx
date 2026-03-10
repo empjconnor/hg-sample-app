@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CustomerInfo from './components/CustomerInfo';
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -14,11 +15,6 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-
-  const selectCustomer = (customerId) => {
-    setSelectedCustomerId(customerId);
-    setActiveTab('customer-info');
-  };
 
   useEffect(() => {
     fetch('/api/onboarding')
@@ -41,6 +37,11 @@ function App() {
       });
   }, []);
 
+  function handleSelectCustomer(customerId) {
+    setSelectedCustomerId(customerId);
+    setActiveTab('customer-info');
+  }
+
   return (
     <div className="app">
       <header>
@@ -62,10 +63,10 @@ function App() {
 
       <main className="content">
         {activeTab === 'dashboard' && (
-          <DashboardTab data={onboardingData} loading={loading} error={error} onSelectCustomer={selectCustomer} />
+          <DashboardTab data={onboardingData} loading={loading} error={error} onSelectCustomer={handleSelectCustomer} />
         )}
         {activeTab === 'customer-info' && (
-          <CustomerInfoTab customerId={selectedCustomerId} onboardingData={onboardingData} />
+          <CustomerInfo selectedCustomerId={selectedCustomerId} />
         )}
         {activeTab === 'data-mapping' && (
           <PlaceholderTab title="Data Mapping" description="Map customer data to platform configuration" />
@@ -107,8 +108,16 @@ function DashboardTab({ data, loading, error, onSelectCustomer }) {
       </p>
 
       {data.map(item => (
-        <div key={item.customerId} className="customer-card" onClick={() => onSelectCustomer(item.customerId)} style={{ cursor: 'pointer' }}>
-          <h3>{item.customerName}</h3>
+        <div key={item.customerId} className="customer-card">
+          <div className="customer-card-header">
+            <h3>{item.customerName}</h3>
+            <button
+              className="view-details-button"
+              onClick={() => onSelectCustomer(item.customerId)}
+            >
+              View Details
+            </button>
+          </div>
           <div className="customer-meta">
             <span>📍 {item.customerRegion}</span>
             <span>🏭 {item.customerIndustry}</span>
@@ -152,78 +161,6 @@ function Checklist({ steps }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function CustomerInfoTab({ customerId, onboardingData }) {
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!customerId) return;
-    setLoading(true);
-    fetch(`/api/customers/${customerId}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        setCustomer(data);
-        setError(null);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [customerId]);
-
-  if (!customerId) {
-    return (
-      <div className="placeholder">
-        <h2>Customer Info</h2>
-        <p>Select a customer from the Dashboard to view their details.</p>
-      </div>
-    );
-  }
-
-  if (loading) return <div className="placeholder"><p>Loading...</p></div>;
-  if (error) return <div className="placeholder"><p style={{ color: '#dc2626' }}>Failed to load customer: {error}</p></div>;
-  if (!customer) return null;
-
-  const onboarding = onboardingData.find(o => o.customerId === customerId);
-
-  return (
-    <div>
-      <h2>{customer.name}</h2>
-      <div className="customer-detail-grid">
-        <div className="detail-item">
-          <label>Contact Email</label>
-          <span>{customer.contactEmail}</span>
-        </div>
-        <div className="detail-item">
-          <label>Industry</label>
-          <span>{customer.industry}</span>
-        </div>
-        <div className="detail-item">
-          <label>Region</label>
-          <span>{customer.region}</span>
-        </div>
-        <div className="detail-item">
-          <label>Created</label>
-          <span>{new Date(customer.createdAt).toLocaleDateString()}</span>
-        </div>
-      </div>
-
-      {onboarding && (
-        <div style={{ marginTop: '24px' }}>
-          <h3>Onboarding Progress</h3>
-          <ProgressBar percent={onboarding.progressPercent} />
-          <Checklist steps={onboarding.steps} />
-        </div>
-      )}
-    </div>
   );
 }
 

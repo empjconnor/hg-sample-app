@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const store = require('./data/store');
+const { calculateProgress } = require('./models');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -63,6 +64,41 @@ app.get('/api/tenants/:customerId', (req, res) => {
     return res.status(404).json({ error: 'Tenant not found' });
   }
   res.json(tenant);
+});
+
+// Update customer info
+app.put('/api/customers/:id', (req, res) => {
+  const customer = store.getCustomerById(req.params.id);
+  if (!customer) {
+    return res.status(404).json({ error: 'Customer not found' });
+  }
+  const { name, industry, region, contactEmail } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Customer name is required' });
+  }
+  const updated = store.updateCustomer(req.params.id, {
+    name: name.trim(),
+    industry: (industry || '').trim(),
+    region: (region || '').trim(),
+    contactEmail: (contactEmail || '').trim()
+  });
+  res.json(updated);
+});
+
+// Update onboarding step status
+app.patch('/api/customers/:id/onboarding/steps/:stepId', (req, res) => {
+  const { status } = req.body;
+  const validStatuses = ['pending', 'in_progress', 'completed', 'failed'];
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({ error: `Status must be one of: ${validStatuses.join(', ')}` });
+  }
+  const state = store.updateOnboardingStepStatus(req.params.id, req.params.stepId, status);
+  if (!state) {
+    return res.status(404).json({ error: 'Customer or step not found' });
+  }
+  state.progressPercent = calculateProgress(state.steps);
+  store.updateOnboardingState(req.params.id, { progressPercent: state.progressPercent });
+  res.json(state);
 });
 
 // Start server only when run directly (not when imported by tests)

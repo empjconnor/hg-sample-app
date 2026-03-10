@@ -110,6 +110,15 @@ function addCustomer(customer) {
   return customer;
 }
 
+function updateCustomer(id, updates) {
+  const index = store.customers.findIndex(c => c.id === id);
+  if (index !== -1) {
+    store.customers[index] = { ...store.customers[index], ...updates, id };
+    return store.customers[index];
+  }
+  return null;
+}
+
 function getTenants() {
   return [...store.tenants];
 }
@@ -145,15 +154,26 @@ function updateOnboardingState(customerId, updates) {
   return null;
 }
 
+function updateOnboardingStepStatus(customerId, stepId, status) {
+  const state = store.onboardingStates.find(s => s.customerId === customerId);
+  if (!state) return null;
+  const step = state.steps.find(s => s.id === stepId);
+  if (!step) return null;
+  step.status = status;
+  return state;
+}
+
 module.exports = {
   getCustomers,
   getCustomerById,
   addCustomer,
+  updateCustomer,
   getTenants,
   getTenantByCustomerId,
   addTenant,
   getOnboardingState,
   getAllOnboardingStates,
   addOnboardingState,
-  updateOnboardingState
+  updateOnboardingState,
+  updateOnboardingStepStatus
 };

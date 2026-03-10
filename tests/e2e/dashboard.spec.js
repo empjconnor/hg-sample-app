@@ -26,7 +26,7 @@ test.describe('Onboarding Dashboard', () => {
 
     // Wait for data to load and verify example customer is shown
     await expect(page.locator('.customer-card')).toBeVisible();
-    await expect(page.locator('.customer-card h3')).toContainText('Acme Corporation');
+    await expect(page.locator('.customer-card h3')).toContainText('Acme Corp');
   });
 
   test('should switch between tabs', async ({ page }) => {
@@ -35,7 +35,21 @@ test.describe('Onboarding Dashboard', () => {
     // Click on Customer Info tab
     await page.getByRole('button', { name: 'Customer Info' }).click();
     
-    // Verify placeholder content is shown
-    await expect(page.locator('.placeholder h2')).toContainText('Customer Info');
+    // Verify customer info content is shown (no longer a placeholder)
+    await expect(page.getByRole('heading', { name: 'Customer Information' })).toBeVisible();
+  });
+
+  test('should navigate to customer info when clicking View Details', async ({ page }) => {
+    await page.goto('/');
+
+    // Wait for the customer card to load
+    await expect(page.locator('.customer-card')).toBeVisible();
+
+    // Click View Details button
+    await page.getByRole('button', { name: 'View Details' }).click();
+
+    // Should navigate to Customer Info tab with customer data
+    await expect(page.getByRole('heading', { name: 'Customer Information' })).toBeVisible();
+    await expect(page.getByLabel('Company Name')).toBeVisible();
   });
 });
