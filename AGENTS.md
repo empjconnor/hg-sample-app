@@ -1,8 +1,8 @@
 # Onboarding Sample App - Agent Guidelines
 
-## Project Overview
+Customer onboarding dashboard -- an internal tool for the CS team to track customers through a four-stage pipeline. Built as a training exercise for AI-assisted development using thin vertical slices.
 
-Internal customer onboarding tool for CS team. React 18 + Vite frontend, Express.js backend, in-memory storage. Training exercise using "Elephant Carpaccio" (thin vertical slices) methodology.
+Each subdirectory (`client/`, `server/`, `tests/`, `sample-data/`) has its own AGENTS.md with section-specific guidance.
 
 ## Commands
 
@@ -13,7 +13,7 @@ Internal customer onboarding tool for CS team. React 18 + Vite frontend, Express
 | `npm run server` | Run backend only |
 | `npm run client` | Run frontend only |
 | `npm run test:unit` | Run server unit tests (node:test) |
-| `npm run test:e2e` | Run Playwright E2E tests |
+| `npm run test:e2e` | Run Playwright E2E tests (app starts automatically) |
 
 ## Project Structure
 
@@ -30,14 +30,13 @@ docs/            Work plan, session logs
 
 ## Conventions
 
-- **JavaScript only** -- no TypeScript. Pure JS throughout.
-- **Server:** CommonJS (`require`/`module.exports`). Express 4.
-- **Client:** ESM (`import`/`export`). React 18 + JSX. Vanilla CSS.
-- **Testing:** `node:test` + `node:assert` for unit tests. Playwright for E2E.
-- **No database** -- in-memory store only.
-- **No auth** -- not needed for this tool.
-- Follow existing code style in neighboring files.
-- Do not add unnecessary dependencies. Check `package.json` before importing anything.
+- JavaScript (no TypeScript) -- CommonJS in server, ES modules in client
+- No external database -- all data is in-memory and resets on server restart
+- No authentication
+- Plain CSS only -- no preprocessors or CSS-in-JS
+- Playwright e2e tests start the app automatically -- do not start it manually before running `npm run test:e2e`
+- Follow existing code style in neighboring files
+- Do not add unnecessary dependencies. Check `package.json` before importing anything
 
 ## Workflow
 
