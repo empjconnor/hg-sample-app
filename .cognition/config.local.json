@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(npm)",
+      "Exec(git)",
+      "Exec(node)",
+      "Exec(npx)",
+      "Exec(mkdir)",
+      "Exec(rm)",
+      "Exec(cat)",
+      "Exec(wt)",
+      "Exec(bash)"
+    ]
+  }
+}
